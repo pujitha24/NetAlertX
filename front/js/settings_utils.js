@@ -965,9 +965,15 @@ function arrayToObject(array) {
 }
 
 // -----------------------------------------------------------------------------
-// Processor to generate options
-//          options     - available options
-//          valuesArray - values = selected options
+/**
+ * Renders <option> elements into the placeholder, marking those whose id is in valuesArray as selected.
+ * Values are matched both raw and HTML-encoded, since callers may pass pre-encoded values.
+ * @param {Array} options Available options ({id, name}).
+ * @param {Array} valuesArray Selected values.
+ * @param {string} targetField Target field key.
+ * @param {*} transformers Label transformers.
+ * @param {string} placeholder Id of the placeholder element to replace.
+ */
 function generateOptions(options, valuesArray, targetField, transformers, placeholder) {
   var optionsHtml = "";
 
@@ -1011,7 +1017,8 @@ function generateOptions(options, valuesArray, targetField, transformers, placeh
     }
 
     // Always include selected if options are used as a source
-    let selected = options.length !== 0 && valuesArray.includes(item.id) ? 'selected' : '';
+    // valuesArray may arrive HTML-encoded (deviceDetailsEdit.php), item.id is raw from the DB
+    let selected = options.length !== 0 && (valuesArray.includes(item.id) || valuesArray.includes(encodeSpecialChars(item.id))) ? 'selected' : '';
 
     optionsHtml += `<option class="${cssClass}" value="${encodeSpecialChars(item.id)}" ${selected}>${encodeSpecialChars(labelName)}</option>`;
   });
