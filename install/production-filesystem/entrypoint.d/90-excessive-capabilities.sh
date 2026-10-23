@@ -18,8 +18,11 @@ if [ -z "$BND_HEX" ]; then
     exit 0
 fi
 
-#POSIX compliant base16 on permissions
-BND_DEC=$(awk 'BEGIN { h = "0x'"$BND_HEX"'"; if (h ~ /^0x[0-9A-Fa-f]+$/) { printf "%d", h; exit 0 } else { exit 1 } }') || exit 0
+# Convert hex to dec with shell arithmetic (awk's printf "%d" overflows 32 bits on some awks)
+case "$BND_HEX" in
+    *[!0-9A-Fa-f]*) exit 0 ;;
+esac
+BND_DEC=$(( 0x$BND_HEX ))
 
 # Allowed capabilities: CHOWN (0), SETGID (6), SETUID (7), NET_BIND_SERVICE (10), NET_ADMIN (12), NET_RAW (13)
 ALLOWED_DEC=$(( ( 1 << 0 ) | ( 1 << 6 ) | ( 1 << 7 ) | ( 1 << 10 ) | ( 1 << 12 ) | ( 1 << 13 ) ))

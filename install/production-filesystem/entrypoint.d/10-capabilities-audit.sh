@@ -39,8 +39,11 @@ _detect_storage_driver() {
 
 # Parse Bounding Set from /proc/self/status
 cap_bnd_hex=$(awk '/CapBnd/ {print $2}' /proc/self/status 2>/dev/null || echo "0")
-# Convert hex to dec (POSIX compliant)
-cap_bnd_dec=$(awk -v hex="$cap_bnd_hex" 'BEGIN { h = "0x" hex; if (h ~ /^0x[0-9A-Fa-f]+$/) { printf "%d", h } else { print 0 } }')
+# Convert hex to dec with shell arithmetic (awk's printf "%d" overflows 32 bits on some awks)
+case "$cap_bnd_hex" in
+    ''|*[!0-9A-Fa-f]*) cap_bnd_dec=0 ;;
+    *) cap_bnd_dec=$(( 0x$cap_bnd_hex )) ;;
+esac
 
 has_cap() {
     bit=$1
