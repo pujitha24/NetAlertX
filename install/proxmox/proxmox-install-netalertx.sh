@@ -293,6 +293,10 @@ umount "${INSTALL_DIR}/log" 2>/dev/null || true
 umount "${INSTALL_DIR}/api" 2>/dev/null || true
 
 printf "%b\n" "Creating log api folders if they don't exist"
+# The repo ships api as a symlink to /tmp/api; replace it so it can become a tmpfs mountpoint
+for d in log api; do
+  if [ -L "${INSTALL_DIR:?}/${d}" ]; then rm -f "${INSTALL_DIR:?}/${d}"; fi
+done
 mkdir -p "${INSTALL_DIR}/log" "${INSTALL_DIR}/api"
 
 printf "%b\n" "--------------------------------------------------------------------------"
